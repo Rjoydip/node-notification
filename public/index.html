@@ -87,8 +87,18 @@
     function showNotify(notiPayload) {
 
       var notification = new Notification(notiPayload.title, notiPayload);
-      setTimeout(notification.close.bind(notification), 5000);
+      notification.onclick = function (event) {
+        fetch('http://localhost:3000/action', {
+          'method': 'GET'
+        }).then(function (response) {
+          console.log("Action", response);
+        }).catch(function (error) {
+          console.error(error);
+        });
+        event.preventDefault(); // prevent the browser from focusing the Notification's tab
+      }
 
+      setTimeout(notification.close.bind(notification), 5000);
     }
 
     function notifyMe(payload) {
@@ -149,7 +159,6 @@
     //   `messaging.setBackgroundMessageHandler` handler.
     messaging.onMessage(function (payload) {
       console.log("Message received. ", payload);
-
       notifyMe(payload);
       // [START_EXCLUDE]
       // Update the UI to include the received message.
@@ -196,7 +205,7 @@
     // - subscribe/unsubscribe the token from topics
     function sendTokenToServer(currentToken) {
       if (!isTokenSentToServer()) {
-        fetch('https://localhost:3000/register', {
+        fetch('localhost:3000/register', {
           'method': 'POST',
           'headers': {
             'Authorization': 'key=' + key,

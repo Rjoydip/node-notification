@@ -1,6 +1,7 @@
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
+var cors = require('cors');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -22,6 +23,9 @@ var tokens = [];
 
 var app = express();
 
+// For cors
+app.use(cors());
+
 // view engine setup
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'ejs');
@@ -41,7 +45,9 @@ app.get('/', function (req, res) {
 });
 
 app.get('/action', function (req, res) {
-  res.status(200).send("Clicked on action");
+  res.status(200).send({
+    message: "Clicked on action"
+  });
 });
 
 app.post('/register', function (req, res) {
@@ -50,12 +56,11 @@ app.post('/register', function (req, res) {
     status: 200,
     message: "Message registered"
   });
-  console.log(tokens);
 });
 
 app.post('/send', function (req, res) {
   // This registration token comes from the client FCM SDKs.
-  var registrationToken = req.body.fireToken;
+  var registrationToken = req.body.token;
 
   // See the "Defining the message payload" section below for details
   // on how to define a message payload.
@@ -65,9 +70,6 @@ app.post('/send', function (req, res) {
       body: "Urgent action is needed to prevent your account from being disabled!"
     }
   };
-
-  console.log(registrationToken);
-
   // Send a message to the device corresponding to the provided
   // registration token.
   admin.messaging().sendToDevice(registrationToken, payload)
