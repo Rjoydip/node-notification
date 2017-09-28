@@ -81,6 +81,44 @@
     const tokenDivId = 'token_div';
     const permissionDivId = 'permission_div';
 
+
+    // [START Notification section]
+
+    function showNotify(notiPayload) {
+
+      var notification = new Notification(notiPayload.title, notiPayload);
+      setTimeout(notification.close.bind(notification), 5000);
+
+    }
+
+    function notifyMe(payload) {
+      // Let's check if the browser supports notifications
+      if (!("Notification" in window)) {
+        alert("This browser does not support system notifications");
+      }
+
+      // Let's check whether notification permissions have already been granted
+      else if (Notification.permission === "granted") {
+        // If it's okay let's create a notification
+        showNotify(payload.notification);
+      }
+
+      // Otherwise, we need to ask the user for permission
+      else if (Notification.permission !== 'denied') {
+        Notification.requestPermission(function (permission) {
+          // If the user accepts, let's create a notification
+          if (permission === "granted") {
+            showNotify(payload.notification);
+          }
+        });
+      }
+
+      // Finally, if the user has denied notifications and you 
+      // want to be respectful there is no need to bother them any more.
+    }
+
+    // [END Notification section]
+
     // [START refresh_token]
     // Callback fired if Instance ID token is updated.
     messaging.onTokenRefresh(function () {
@@ -111,6 +149,8 @@
     //   `messaging.setBackgroundMessageHandler` handler.
     messaging.onMessage(function (payload) {
       console.log("Message received. ", payload);
+
+      notifyMe(payload);
       // [START_EXCLUDE]
       // Update the UI to include the received message.
       appendMessage(payload);
